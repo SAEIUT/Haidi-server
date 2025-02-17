@@ -6,14 +6,15 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 
 var userRouter = require('./routes/user');
+var firebaseRouter = require('./routes/firebase');
 var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
 var reservationRouter = require('./routes/reservation');
 var notificationRouter = require('./routes/notification');;
 var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
 
-
 var app = express();
+app.use(express.json());
 const db = require('./sql-database');
 
 db.sequelize.sync({ alter: true })
@@ -24,7 +25,7 @@ db.sequelize.sync({ alter: true })
     console.error('Error synchronizing the database:', err);
   });
 
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000'];
+const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000',"'http://localhost",'http://localhost:80'];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -40,6 +41,8 @@ app.use(cors({
 app.options('*', cors());
 
 app.use('/api/user/', userRouter);
+app.use('/api/firebase/', firebaseRouter);
+
 app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
