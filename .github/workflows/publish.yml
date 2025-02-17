@@ -1,0 +1,33 @@
+name: pipeline
+on:
+  push:
+    branches:
+      - 'docker'
+      - 'dev-api'
+      - 'Maintenance'
+jobs:
+  deploy:
+    name: run docker compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+    
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Run Docker Compose
+        working-directory: .
+        run: |
+          docker-compose up -d --build
+      
+      - name: Test Database
+        working-directory: .
+        run: |
+          docker-compose run app npm test
