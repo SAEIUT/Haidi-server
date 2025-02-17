@@ -5,23 +5,23 @@ const { checkEmailExists, signInUser, createUser,signInAgent,createAgent } = req
 
 const router = express.Router();
 
-router.post('/User/check-email', checkEmailExists);
+router.post('/user/check-email', checkEmailExists);
 
-router.post('/User/sign-in', signInUser);
+router.post('/user/sign-in', signInUser);
 
-router.post('/User/sign-up', createUser);
+router.post('/user/sign-up', createUser);
 
 
-router.post('/Agent/sign-in', signInAgent);
+router.post('/agent/sign-in', signInAgent);
 
-router.post('/Agent/sign-up', createAgent);
+router.post('/agent/sign-up', createAgent);
 
 module.exports = router;
 
 
 /**
  * @swagger
- * /User/check-email:
+ * /api/user/check-email:
  *   post:
  * 
  *     summary: Vérifier si un email existe
@@ -58,7 +58,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /User/sign-in:
+ * /api/user/sign-in:
  *   post:
  *     tags: [Firebase]
  *     summary: Se connecter avec un email et un mot de passe
@@ -95,7 +95,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /User/sign-up:
+ * /api/user/sign-up:
  *   post:
  *     tags: [Firebase]
  *     summary: Créer un nouvel utilisateur
@@ -132,7 +132,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /Agent/sign-in:
+ * /api/agent/sign-in:
  *   post:
  *     tags: [Firebase]
  *     summary: Se connecter avec un email et un mot de passe
@@ -169,7 +169,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /Agent/sign-up:
+ * /api/agent/sign-up:
  *   post:
  *     tags: [Firebase]
  *     summary: Créer un nouvel utilisateur

@@ -13,6 +13,7 @@ var reservationRouter = require('./routes/reservation');
 var notificationRouter = require('./routes/notification');;
 var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
 
+
 var app = express();
 app.use(express.json());
 const db = require('./sql-database');
@@ -25,7 +26,8 @@ db.sequelize.sync({ alter: true })
     console.error('Error synchronizing the database:', err);
   });
 
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000',"'http://localhost",'http://localhost:80'];
+  
+const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000','http://localhost','http://localhost:80'];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -35,10 +37,19 @@ app.use(cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization'] ,
 }));
 
 app.options('*', cors());
+
+
+app.use(express.static(path.join(__dirname, 'web', 'dist')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'web', 'dist', 'index.html'));
+});
+
+
 
 app.use('/api/user/', userRouter);
 app.use('/api/firebase/', firebaseRouter);
