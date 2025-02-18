@@ -93,7 +93,6 @@ module.exports = router;
  *         description: Erreur du serveur.
  */
 
-
 /**
  * @swagger
  * /api/user/sign-up:
@@ -140,7 +139,7 @@ module.exports = router;
  *               Note:
  *                 type: string
  *                 description: Des notes supplémentaires concernant l'utilisateur.
- *                 example: 'Notes importantes sur l\'utilisateur.'
+ *                 example: Notes importantes
  *               handicap:
  *                 type: boolean
  *                 description: Indique si l'utilisateur a un handicap.

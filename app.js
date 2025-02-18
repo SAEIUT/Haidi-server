@@ -61,11 +61,24 @@ app.get('/list-routes', (req, res) => {
 });
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+console.log(__dirname);
+app.use(express.static(path.join(__dirname, '/web/dist'))); // Serve les fichiers générés par Vite
 
-app.use(express.static(path.join(__dirname, 'web/dist'))); // Serve les fichiers générés par Vite
-
-// Si aucune route API n'est trouvée, redirige vers l'app React
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'web/dist/index.html'));
+// Correction du chemin avec path.join
+app.get('*', (req, res, next) => {
+  // Utilisation du chemin relatif correct sans /opt/app
+  const filePath = path.join(__dirname, 'web', 'dist', 'index.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        console.error(`Erreur : Fichier introuvable à l'emplacement ${filePath}`);
+        return res.status(404).json({ error: 'Fichier index.html non trouvé.' });
+      } else {
+        console.error('Erreur lors de la tentative d\'envoi du fichier index.html:', err);
+        return next(err);
+      }
+    }
+  });
 });
+
 module.exports = app;
