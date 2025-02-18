@@ -1,4 +1,4 @@
-name: pipeline
+name: Run Docker Compose and test
 on:
   push:
     branches:
@@ -10,6 +10,12 @@ jobs:
   deploy:
     name: run docker compose
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+      MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+      ME_CONFIG_MONGODB_URL: ${{ secrets.ME_CONFIG_MONGODB_URL }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -22,7 +28,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-
+      
+      - name: Create .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "ME_CONFIG_MONGODB_URL=${{ secrets.ME_CONFIG_MONGODB_URL }}" >> .env
       - name: Run Docker Compose
         working-directory: .
         run: |
