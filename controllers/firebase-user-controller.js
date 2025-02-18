@@ -6,6 +6,11 @@ const {adminAuth} = require('../config/firebase-admin-config');
 // Vérification de l'existence de l'email
 exports.checkEmailExists = async (req, res) => {
   const { email } = req.body;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+  if (!emailRegex.test(email)) {
+    return res.status(400).send({ error: 'Email invalide' });
+  }
 
   try {
     await adminAuth.getUserByEmail(email);

@@ -1,19 +1,14 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, './src'),  // Garde ton alias actuel
-    },
-  },
+  root: '.',  // Assure-toi que le root est bien défini
   build: {
-    outDir: 'dist', // Spécifie le dossier de sortie
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'), // Assure que le bon fichier HTML est pris en compte
+      input: 'index.html', // Spécifie l'entrée correcte pour ton fichier index.html
     },
   },
-  base: '/', // Utilisation de la base "/" si ton app est à la racine
-})  
+  assetsInclude: ['**/*.html'], // Assure que les fichiers .html sont traités comme des ressources statiques
+});
+

@@ -10,6 +10,7 @@ var debug = require('debug')('src:server');
 var http = require('http')
 const { initProducer, startConsumer } = require('../kafka');
 const { createServer } = require('vite');  // Import de Vite
+const path = require('path'); // Ajoute cette ligne en haut du fichier
 
 /**
  * Get port from environment and store in Express.
@@ -35,16 +36,30 @@ initProducer()
   });
 
 
-  // Lancer le serveur Vite en mode middleware
-async function startVite() {
-  const vite = await createServer({
-    server: {
-      middlewareMode: true,  // Active le mode middleware pour Express
-    },
-  });
-  // Utiliser les middlewares de Vite pour servir l'app front-end
-  app.use(vite.middlewares);
-}
+  async function startVite() {
+    const vite = await createServer({
+      root: path.resolve(__dirname, '../web'),  // Définit la bonne racine
+      server: {
+        middlewareMode: true,  // Active le mode middleware pour Express
+      },
+    });
+  
+    // Middleware pour forcer la redirection vers index.html
+    app.use(async (req, res, next) => {
+      if (req.originalUrl === '/' || req.originalUrl.startsWith('/index.html')) {
+        const html = await vite.transformIndexHtml(
+          req.originalUrl, 
+          await vite.ssrLoadModule(path.resolve(__dirname, '../web/index.html'))
+        );
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+        return;
+      }
+      next();
+    });
+  
+    // Utiliser les middlewares de Vite pour servir l'app front-end
+    app.use(vite.middlewares);
+  }
 
 startVite().then(() => {
   // Lancer le serveur Express après avoir démarré Vite

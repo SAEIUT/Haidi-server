@@ -43,12 +43,6 @@ app.use(cors({
 app.options('*', cors());
 
 
-app.use(express.static(path.join(__dirname, 'web', 'dist')));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'web', 'dist', 'index.html'));
-});
-
 
 
 app.use('/api/user/', userRouter);
@@ -64,5 +58,7 @@ app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
 });
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
 
 module.exports = app;
