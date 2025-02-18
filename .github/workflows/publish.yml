@@ -5,6 +5,7 @@ on:
       - 'docker'
       - 'dev-api'
       - 'Maintenance'
+      - 'maintenance'
 jobs:
   deploy:
     name: run docker compose
