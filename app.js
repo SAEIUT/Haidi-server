@@ -5,6 +5,8 @@ const listEndpoints = require('express-list-endpoints');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 
+const vite = require('vite');
+
 var userRouter = require('./routes/user');
 var firebaseRouter = require('./routes/firebase');
 var agentRouter = require('./routes/agent');
@@ -60,5 +62,10 @@ app.get('/list-routes', (req, res) => {
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
+app.use(express.static(path.join(__dirname, 'web/dist'))); // Serve les fichiers générés par Vite
 
+// Si aucune route API n'est trouvée, redirige vers l'app React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'web/dist/index.html'));
+});
 module.exports = app;

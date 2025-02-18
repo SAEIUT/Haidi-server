@@ -1,14 +1,18 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
-  root: '.',  // Assure-toi que le root est bien défini
+  root: path.resolve(__dirname),  // Le dossier contenant le front-end
   build: {
+    outDir: path.resolve(__dirname),  // Le dossier où les fichiers construits seront placés
     rollupOptions: {
-      input: 'index.html', // Spécifie l'entrée correcte pour ton fichier index.html
+      input: path.resolve(__dirname, 'index.html'),  // Chemin absolu vers index.html
+    },
+    emptyOutDir: true,  // Vide le dossier de sortie avant de construire
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3000',  // Exemple de proxy pour les requêtes API vers Express
     },
   },
-  assetsInclude: ['**/*.html'], // Assure que les fichiers .html sont traités comme des ressources statiques
 });
-
