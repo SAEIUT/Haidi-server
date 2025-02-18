@@ -18,4 +18,6 @@ jobs:
         key: ${{ secrets.AZURE_VM_SSH_KEY }}
         script: |
           cd /home/azureuser/Haidi-server
+          sudo docker compose down
           git pull origin main
+          sudo docker compose up --build -d
