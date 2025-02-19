@@ -25,6 +25,21 @@ exports.getReservationById = async (req, res) => {
   }
 };
 
+exports.deleteReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedReservation = await no_sql_db.DataModel.findOneAndDelete({ idDossier: id });
+
+    if (!deletedReservation) {
+      return res.status(404).json({ error: "Réservation non trouvée." });
+    }
+
+    res.status(200).json({ message: "Réservation supprimée avec succès." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.createReservation = async (req, res) => {
   try {
     const data = req.body;

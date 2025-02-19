@@ -10,6 +10,8 @@ router.get('/:id', reservationController.getReservationById);
 
 router.post('/',reservationController.createReservation);
 
+router.post('/deleteReservation/:id',reservationController.deleteReservation);
+
 router.get('/byuserid/:id',reservationController.getReservationsByUserId);
 
 router.get('/bygoogleid/:id', reservationController.getReservationsByGoogleId);
@@ -388,6 +390,27 @@ module.exports = router;
  *         description: Accompagnant added successfully
  *       400:
  *         description: Invalid data format
+ *       500:
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /api/reservation/deleteReservation/{id}:
+ *   post:
+ *     summary: Delete a reservation by dossier ID
+ *     tags: [Reservations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The dossier ID of the reservation to be deleted
+ *     responses:
+ *       200:
+ *         description: Reservation deleted successfully
+ *       404:
+ *         description: Reservation not found
  *       500:
  *         description: Internal server error
  */
