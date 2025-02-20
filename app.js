@@ -29,7 +29,7 @@ db.sequelize.sync({ alter: true })
   });
 
   
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000','http://localhost','http://localhost:80'];
+const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000','http://localhost','http://localhost:80', 'http://4.233.60.46:8081', 'http://4.233.60.46:8082', 'http://4.233.60.46:19006', 'http://4.233.60.46:3000', 'http://4.233.60.46', 'http://4.233.60.46:80',];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
