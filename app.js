@@ -65,7 +65,7 @@ console.log(__dirname);
 app.use(express.static(path.join(__dirname, '/web/dist'))); // Serve les fichiers générés par Vite
 
 // Correction du chemin avec path.join
-app.get('*', (req, res, next) => {
+app.get('/', (req, res, next) => {
   // Utilisation du chemin relatif correct sans /opt/app
   const filePath = path.join(__dirname, 'web', 'dist', 'index.html');
   res.sendFile(filePath, (err) => {
