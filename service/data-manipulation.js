@@ -11,9 +11,11 @@ const API_MAPPING = {
 
 const transformData = (incomingData) => {
     return {
-        idDossier: incomingData["id-dossier"],
+        idDossier: incomingData.idDossier,
         idPMR: incomingData.idPMR,
         googleId: incomingData.googleId,
+        id_accompagnant: incomingData.id_accompagnant,
+        googleId_accompagnant: incomingData.googleId_accompagnant,
         enregistre: incomingData.enregistre,
         Assistance: incomingData.Assistance,
         sousTrajets: incomingData.sousTrajets.map(st => ({

@@ -1,132 +1,32 @@
 var express = require('express');
 var router = express.Router();
-const db = require('../sql-database');
-const no_sql_db = require('../nosql-database');
-const data_manip = require('../service/data-manipulation');
-const path = require('path');
-const { stringify } = require('querystring');
+const reservationController = require('../controllers/reservationController');
 
 router.use(express.json());
 
-router.get('/all',function(req,res){
-  no_sql_db.DataModel.find()
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
+router.get('/all', reservationController.getAllReservations);
 
-router.get('/:id', async function (req, res) {
-  try {
-      const reservation = await no_sql_db.DataModel.findOne({ idDossier: req.params.id });
+router.get('/:id', reservationController.getReservationById);
 
-      if (reservation.length === 0) {
-          return res.status(404).json({ error: "No reservations found for the given idDossier." });
-      }
-      console.log(reservation);
-      const updatedReservations = await data_manip.getDataFromAPIs(reservation._doc);
+router.post('/',reservationController.createReservation);
 
-      res.status(200).json(updatedReservations);
-  } catch (err) {
-      console.error('Error in GET /:id:', err.message);
-      res.status(500).json({ error: err.message });
-  }
-});
+router.post('/deleteReservation/:id',reservationController.deleteReservation);
 
+router.get('/byuserid/:id',reservationController.getReservationsByUserId);
 
-router.post('/',function(req,res){
-  const data = req.body;
+router.get('/bygoogleid/:id', reservationController.getReservationsByGoogleId);
 
-  if (!data || !data.idPMR || !data.sousTrajets || !data.bagage) {
-    return res.status(400).json({ error: 'Invalid data format.' });
-  }
+router.get('/:dossier/:trajet', reservationController.getTrajet);
 
-  console.log('Received data:', data);
-  data_manip.sendDataToAPIs(data);
-  transformedData = data_manip.transformData(data);
+router.get('/setDone/:dossier/:trajet', reservationController.setTrajetDone);
 
-  new no_sql_db.DataModel(data).save()
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
+router.get('/setOngoing/:dossier/:trajet', reservationController.setTrajetOngoing);
 
-router.get('/byuserid/:id', async function (req, res) {
-  try {
-      const reservations = await no_sql_db.DataModel.find({ idPMR: req.params.id });
-      const reservationsData = reservations.map(doc => doc._doc);
-      const updatedReservations = await Promise.all(
-          reservationsData.map(async (reservation) => {
-              return await data_manip.getDataFromAPIs(reservation);
-          })
-      );
+router.post('/addAccompagnant/:idDossier', reservationController.addAccompagnantToTrajet);
 
-      res.status(200).json(updatedReservations);
-  } catch (err) {
-      console.error('Error in GET /byuserid/:id:', err.message);
-      res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/bygoogleid/:id', async function (req, res) {
-  try {
-      const reservations = await no_sql_db.DataModel.find({ googleId: req.params.id });
-      const reservationsData = reservations.map(doc => doc._doc);
-      const updatedReservations = await Promise.all(
-        reservationsData.map(async (reservation) => {
-              return await data_manip.getDataFromAPIs(reservation);
-          })
-      );
-
-      res.status(200).json(updatedReservations);
-  } catch (err) {
-      console.error('Error in GET /bygoogleid/:id:', err.message);
-      res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/:dossier/:trajet', async function(req, res){
-  try{
-    const trajet = await no_sql_db.DataModel.findOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet},
-      {
-        "sousTrajets.$": 1
-      });
-    console.log(trajet);
-    const updatedTrajet = await data_manip.getTrajetFromAPIs(trajet.sousTrajets[0]);
-
-    res.status(200).json(updatedTrajet)
-  } catch (err) {
-    console.error('Error in GET /:dossier/:trajet', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/setDone/:dossier/:trajet', function(req,res){
-  no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":2}})
-  .then( reservation => {
-    res.status(200).send(JSON.stringify(reservation));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
-
-router.get('/setOngoing/:dossier/:trajet', function(req,res){
-  no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":1}})
-  .then( reservation => {
-    res.status(200).send(JSON.stringify(reservation));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
 
 module.exports = router;
+
 /**
  * @swagger
  * tags:
@@ -458,6 +358,59 @@ module.exports = router;
  *     responses:
  *       200:
  *         description: SousTrajet status updated to "ongoing"
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/reservation/addAccompagnant/{reservationId}:
+ *   post:
+ *     summary: Add an accompagnant to a reservation
+ *     tags: [Reservations]
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the reservation to which the accompagnant should be added
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               emailAccompagnant:
+ *                 type: string
+ *                 description: Email of the accompagnant
+ *     responses:
+ *       200:
+ *         description: Accompagnant added successfully
+ *       400:
+ *         description: Invalid data format
+ *       500:
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /api/reservation/deleteReservation/{id}:
+ *   post:
+ *     summary: Delete a reservation by dossier ID
+ *     tags: [Reservations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The dossier ID of the reservation to be deleted
+ *     responses:
+ *       200:
+ *         description: Reservation deleted successfully
+ *       404:
+ *         description: Reservation not found
  *       500:
  *         description: Internal server error
  */

@@ -1,122 +1,18 @@
 var express = require('express');
 var router = express.Router();
-const db = require('../sql-database');
-const path = require('path');
-const { stringify } = require('querystring');
+const userController = require('../controllers/userController');
+
 
 router.use(express.json());
 
-/* GET all User*/
-router.get("/all",function(req,res){
-  db.User.findAll()
-    .then( users => {
-      res.status(200).send(JSON.stringify(users));
-    })
-    .catch( err => {
-      res.status(500).send(JSON.stringify(err));
-    });
-});
-
-/* GET User by ID. */
-router.get('/:id', function(req, res) {
-  db.User.findByPk(req.params.id)
-    .then( user => {
-      res.status(200).send(JSON.stringify(user));
-    })
-    .catch( err => {
-      res.status(500).send(JSON.stringify(err));
-    });
-});
-
-/* POST new User*/
-router.post('/', function(req, res){
-  db.User.create({
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    birthdate: req.body.birthdate,
-    email: req.body.email,
-    tel: req.body.tel,
-    password: req.body.password,
-    civility: req.body.civility,
-    note: req.body.note,
-    handicap: req.body.handicap,
-    googleUUID: req.body.googleUUID
-  })
-  .then(user => res.status(201).send(user))
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
-
-router.get('/byGoogleID/:uuid', function(req, res){
-  db.User.findOne({
-    where: { googleUUID: req.params.uuid }
-  }).then(user => res.status(201).send(user))
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-})
-
-/* POST Edit User*/
-router.post('/:id', function(req, res){
-  db.User.update({
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    tel: req.body.tel,
-    password: req.body.password,
-    civility: req.body.civility,
-    note: req.body.note,
-    handicap: req.body.handicap
-  },
-    {
-      where: {
-        id: req.params.id,
-      },
-    },
-  )
-  .then(user => res.status(201).send(user))
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
-
-router.post('/byGoogleID/:uuid', function(req, res){
-  db.User.update({
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    tel: req.body.tel,
-    password: req.body.password,
-    civility: req.body.civility,
-    note: req.body.note,
-    handicap: req.body.handicap
-  },
-    {
-      where: {
-        id: req.params.uuid,
-      },
-    },
-  )
-  .then(user => res.status(201).send(user))
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
-
-
-/* DELETE User*/
-router.get("/delete/:id", function(req, res){
-  db.User.destroy({
-    where: {
-      id: req.params.id
-    }
-  })
-  .then(() => res.status(200).send({ message: 'User deleted successfully' }))
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
+router.get("/all", userController.getAllUsers);
+router.get('/:id', userController.getUserById);
+router.post('/', userController.createUser);
+router.get('/byGoogleID/:uuid', userController.getUserByGoogleId);
+router.post('/:id', userController.updateUser);
+router.post('/byGoogleID/:uuid', userController.updateUser);
+router.get("/delete/:id", userController.deleteUser);
+router.get("/getIfAccompagnantOfPMR/:id", userController.getIfAccompagnantOfPMR);
 
 module.exports = router;
 /**
@@ -174,6 +70,9 @@ module.exports = router;
  *         googleUUID:
  *           type: string
  *           description: The Google UUID of the user
+ *         role:
+ *           type: string
+ *           description: The role of the user (accompagnant, pmr)
  *         Handicap:
  *           type: object
  *           description: Associated handicap details
@@ -247,7 +146,9 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               firstname:
+ *                 type: string
+ *               lastname:
  *                 type: string
  *               birthdate:
  *                 type: string
@@ -266,6 +167,9 @@ module.exports = router;
  *                 type: integer
  *               googleUUID:
  *                 type: string
+ *               role:
+ *                 type: string
+ *                 description: The role of the user (accompagnant, pmr)
  *     responses:
  *       201:
  *         description: User created successfully
@@ -297,7 +201,9 @@ module.exports = router;
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               firstname:
+ *                 type: string
+ *               lastname:
  *                 type: string
  *               birthdate:
  *                 type: string
@@ -314,15 +220,12 @@ module.exports = router;
  *                 type: string
  *               handicap:
  *                 type: integer
- *               googleUUID:
+ *               role:
  *                 type: string
+ *                 description: The role of the user (accompagnant, pmr)
  *     responses:
  *       201:
  *         description: User updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
  *       404:
  *         description: User not found
  *       500:
@@ -355,62 +258,87 @@ module.exports = router;
  * @swagger
  * /api/user/byGoogleID/{uuid}:
  *   get:
- *     summary: Get a user by Google UUID
  *     tags: [Users]
+ *     summary: Récupérer un utilisateur par Google UUID
+ *     description: Retourne un utilisateur en fonction de son Google UUID
  *     parameters:
- *       - in: path
- *         name: uuid
+ *       - name: uuid
+ *         in: path
+ *         required: true
+ *         description: L'UUID de l'utilisateur
  *         schema:
  *           type: string
- *         required: true
- *         description: Google UUID of the user
  *     responses:
  *       200:
- *         description: User details
+ *         description: Utilisateur trouvé
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
- *       404:
- *         description: User not found
  *       500:
- *         description: Internal server error
- *   post:
- *     summary: Update a user by Google UUID
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Message d'erreur détaillé"
+ */
+
+
+/**
+ * @swagger
+ * /api/user/getIfAccompagnantOfPMR/{id}:
+ *   get:
  *     tags: [Users]
+ *     summary: Vérifie si un utilisateur est accompagnant d'une personne à mobilité réduite (PMR)
+ *     description: Recherche dans les réservations si l'ID spécifié correspond à un accompagnant (id_accompagnant ou googleId_accompagnant).
  *     parameters:
- *       - in: path
- *         name: uuid
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID ou Google ID de l'utilisateur à vérifier
  *         schema:
  *           type: string
- *         required: true
- *         description: Google UUID of the user
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               tel:
- *                 type: integer
- *               password:
- *                 type: string
- *               civility:
- *                 type: string
- *               note:
- *                 type: string
- *               handicap:
- *                 type: integer
  *     responses:
- *       201:
- *         description: User updated successfully
+ *       200:
+ *         description: Liste des voyages où l'utilisateur est accompagnant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   idPMR:
+ *                     type: string
+ *                     description: Identifiant de la personne à mobilité réduite
+ *                   idVoyage:
+ *                     type: string
+ *                     description: Identifiant du voyage
  *       404:
- *         description: User not found
+ *         description: Aucune correspondance trouvée
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Aucune correspondance trouvée."
  *       500:
- *         description: Internal server error
+ *         description: Erreur serveur
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Message d'erreur détaillé"
  */
+
+
+
