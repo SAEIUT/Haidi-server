@@ -1,7 +1,7 @@
 // /routes/userRoutes.js
 
 var express = require('express');
-const { checkEmailExists, signInUser, createUser,signInAgent,createAgent,getUserByUid,getAgentByUid } = require('../controllers/firebase-user-controller');
+const { checkEmailExists, signInUser, createUser,signInAgent,createAgent,getUserByUid,getAgentByUid, updateUser } = require('../controllers/firebase-user-controller');
 
 const router = express.Router();
 
@@ -18,6 +18,8 @@ router.post('/agent/sign-up', createAgent);
 
 router.get('/user/:uid', getUserByUid);
 router.get('/agent/:uid', getAgentByUid);
+
+router.put('/user/:uid', updateUser);
 
 module.exports = router;
 
