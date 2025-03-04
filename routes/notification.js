@@ -24,23 +24,31 @@ router.post('/produce', async (req, res) => {
   }
 });
 
-router.post('/consume', async (req, res) => {
+global.clients = [];
+
+router.post('/consume', (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+      return res.status(400).send('User ID is required');
+  }
+
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
 
-  res.write('data: Consumer started\n\n');
+  // Store client connection
+  const client = { userId: userId.toString(), res };
+  global.clients.push(client);
 
-  try {
-    // Start the Kafka consumer and push events as messages are consumed
-    await startConsumer((message) => {
-        // Send the consumed message to the client in real-time using SSE
-        res.write(`data: ${JSON.stringify(message)}\n\n`);
-    }, req.body.userId);
-} catch (err) {
-    console.error('Error starting the consumer', err);
-    res.status(500).send('Failed to start the consumer');
-}
+  console.log(`Client connected: ${userId}`);
 
+  res.write('data: Connected to consumer\n\n');
+
+  // Handle client disconnect
+  req.on('close', () => {
+      global.clients = global.clients.filter(c => c !== client);
+      console.log(`Client disconnected: ${userId}`);
+  });
 });
 module.exports = router;
