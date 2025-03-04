@@ -1,8 +1,9 @@
 // firebaseController.js
 const { signInWithEmailAndPassword, createUserWithEmailAndPassword } = require('firebase/auth');
 const { authPMR, authAGENT } = require('../config/firebase-config');
-const {adminAuthPMR,} = require('../config/firebase-admin-config');
-const { saveUserToFirestore } = require("../service/firebase-user-services");
+const {adminAuthPMR, adminAuthAgent, dbFireStoreAgent,dbFireStorePMR} = require('../config/firebase-admin-config');
+const { doc, getDoc } = require('firebase/firestore');
+const { saveUserToFirestore,getUserFromFirestore } = require("../service/firebase-user-services");
 
 // Vérification de l'existence de l'email
 exports.checkEmailExists = async (req, res) => {
@@ -77,7 +78,7 @@ exports.createUser = async (req, res) => {
 
     // Enregistrement dans Firestore pour PMR
     await saveUserToFirestore({
-      uid: user.uid, // UID Firebase
+      uid: user.uid,
       firstname,
       lastname,
       birthdate,
@@ -86,7 +87,7 @@ exports.createUser = async (req, res) => {
       Tel,
       Note,
       handicap,
-    }, 'PMR'); // On enregistre dans le Firestore PMR
+    }, 'PMR');
 
     return res.status(200).json({ user });
   } catch (error) {
@@ -132,15 +133,68 @@ exports.createAgent = async (req, res) => {
 
     // Enregistrement dans Firestore pour AGENT
     await saveUserToFirestore({
-      uid: user.uid, // UID Firebase
+      uid: user.uid, 
       email,
       entreprise,
       civility,
       Tel,
-    }, 'AGENT'); // On enregistre dans le Firestore AGENT
+    }, 'AGENT');
 
     return res.status(200).json({ user });
   } catch (error) {
     return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getUserByUid = async (req, res) => {
+  const { uid } = req.params;
+
+  if (!uid) {
+    return res.status(400).json({ error: "Le champ 'uid' est obligatoire." });
+  }
+
+  try {
+    // Récupérer l'utilisateur depuis Firestore en fonction du type PMR
+    const user = await getUserFromFirestore(uid, "PMR");
+
+    // Si l'utilisateur est trouvé
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAgentByUid = async (req, res) => {
+  const { uid } = req.params;
+
+  if (!uid) {
+    return res.status(400).json({ error: "Le champ 'uid' est obligatoire." });
+  }
+
+  try {
+    // Récupérer l'agent depuis Firestore en fonction du type AGENT
+    const agent = await getUserFromFirestore(uid, "AGENT");
+
+    // Si l'agent est trouvé
+    return res.status(200).json({ agent });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  const { uid } = req.params;
+  const updatedData = req.body;  // Assurez-vous que les clés correspondent bien à celles du document Firestore
+  try {
+    const userRef = dbFireStorePMR.collection('users').doc(uid);
+    await userRef.update(updatedData);
+    // Optionnel : récupérer le document mis à jour pour le renvoyer
+    const updatedUser = await userRef.get();
+    res.status(200).json({ message: 'Mise à jour réussie', user: updatedUser.data() });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de l’utilisateur Firebase :', error);
+    res.status(500).json({ error: error.message });
   }
 };
