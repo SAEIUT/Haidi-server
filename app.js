@@ -14,6 +14,7 @@ var handicapRouter = require('./routes/handicap');
 var reservationRouter = require('./routes/reservation');
 var notificationRouter = require('./routes/notification');;
 var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
+var bagageRouter = require('./routes/bagage')
 
 
 var app = express();
@@ -55,6 +56,8 @@ app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
 app.use('/api/notification/', notificationRouter);
 app.use('/api/textrecognition/', textRecognitionRouter); // Nouvelle ligne
+app.use('/api/bagage/', bagageRouter);
+
 
 app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
