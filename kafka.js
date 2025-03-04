@@ -14,28 +14,40 @@ const initProducer = async () => {
 
 // Kafka Consumer
 const consumer = kafka.consumer({ groupId: 'notification-group' });
-
-const startConsumer = async (messageCallback, userId) => {
+const startConsumer = async (messageCallback) => {
     await consumer.connect();
     console.log('Consumer connected');
-    
-    // Subscribe to the topic
+
+    // Subscribe to topic once
     await consumer.subscribe({ topic: 'user-events', fromBeginning: true });
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            const userIdkey = message.key.toString(); // The key is the userId
+            const userIdKey = message.key.toString(); // The key is the userId
             const eventMessage = message.value.toString();
 
-            console.log(`Received message for user ${userIdkey}: ${eventMessage}`);
+            console.log(`Received message for user ${userIdKey}: ${eventMessage}`);
 
-            // Call the provided callback function to push the message to the client
-            if (userId.toString()===userIdkey){
-                messageCallback({ userIdkey, eventMessage });
-            }
+            // Pass message to callback
+            messageCallback({ userId: userIdKey, eventMessage });
         },
     });
 };
+
+// Start consumer only once at application startup
+startConsumer((message) => {
+    // This will be used later for sending messages to SSE clients
+    if (global.clients) {
+        global.clients.forEach(client => {
+            if (client.userId === message.userId) {
+                client.res.write(`data: ${JSON.stringify(message)}\n\n`);
+            }
+        });
+    }
+}).catch(console.error);
+
+module.exports = { consumer };
+
 
 
 // Send a message to Kafka (producer)
@@ -59,7 +71,7 @@ const sendMessage = async (userId, message) => {
 
 module.exports = {
     initProducer,
-    startConsumer,
+    consumer,
     sendMessage,
     producer
 };
