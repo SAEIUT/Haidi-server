@@ -6,7 +6,8 @@
     "start": "node ./bin/www",
     "test": "jest",
     "migrate": "node ./bin/migrate.js",
-    "drop": "node ./bin/drop.js"
+    "drop": "node ./bin/drop.js",
+    "build:web": "cd /web && npm install --force && npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",

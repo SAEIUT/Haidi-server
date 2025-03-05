@@ -30,7 +30,7 @@ db.sequelize.sync({ alter: true })
   });
 
   
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000','http://localhost','http://localhost:80', 'http://4.233.60.46:8081', 'http://4.233.60.46:8082', 'http://4.233.60.46:19006', 'http://4.233.60.46:3000', 'http://4.233.60.46', 'http://4.233.60.46:80',];
+  const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000','http://localhost','http://localhost:80', 'http://4.233.60.46:8081', 'http://4.233.60.46:8082', 'http://4.233.60.46:19006', 'http://4.233.60.46:3000', 'http://4.233.60.46', 'http://4.233.60.46:80',];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -65,12 +65,12 @@ app.get('/list-routes', (req, res) => {
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 console.log(__dirname);
-app.use(express.static(path.join(__dirname, '/web/dist'))); // Serve les fichiers générés par Vite
+app.use(express.static(path.join(__dirname, '/web/build'))); // Serve les fichiers générés par Vite
 
 // Correction du chemin avec path.join
-app.get('*', (req, res, next) => {
+app.get('/', (req, res, next) => {
   // Utilisation du chemin relatif correct sans /opt/app
-  const filePath = path.join(__dirname, 'web', 'dist', 'index.html');
+  const filePath = path.join(__dirname, 'web', 'build', 'index.html');
   res.sendFile(filePath, (err) => {
     if (err) {
       if (err.code === 'ENOENT') {
