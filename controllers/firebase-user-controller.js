@@ -184,3 +184,17 @@ exports.getAgentByUid = async (req, res) => {
   }
 };
 
+exports.updateUser = async (req, res) => {
+  const { uid } = req.params;
+  const updatedData = req.body;  // Assurez-vous que les clés correspondent bien à celles du document Firestore
+  try {
+    const userRef = dbFireStorePMR.collection('users').doc(uid);
+    await userRef.update(updatedData);
+    // Optionnel : récupérer le document mis à jour pour le renvoyer
+    const updatedUser = await userRef.get();
+    res.status(200).json({ message: 'Mise à jour réussie', user: updatedUser.data() });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de l’utilisateur Firebase :', error);
+    res.status(500).json({ error: error.message });
+  }
+};
