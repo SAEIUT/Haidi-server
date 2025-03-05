@@ -1,88 +1,21 @@
 var express = require('express');
 var router = express.Router();
-const db = require('../sql-database');
-const path = require('path');
-const { stringify } = require('querystring');
-const data_manip = require('../service/data-manipulation');
+const agentController = require('../controllers/agent-Controller');
 
 
 router.use(express.json());
 
-/* GET all Agent*/
-router.get("/all",function(req,res){
-  db.Agent.findAll()
-    .then( agents => {
-      res.status(200).send(JSON.stringify(agents));
-    })
-    .catch( err => {
-      res.status(500).send(JSON.stringify(err));
-    });
-});
+router.get("/all",agentController.getAllAgents);
 
-/* GET Agent by ID. */
-router.get('/:id', function(req, res) {
-  db.Agent.findByPk(req.params.id)
-    .then( agent => {
-      res.status(200).send(JSON.stringify(agent));
-    })
-    .catch( err => {
-      res.status(500).send(JSON.stringify(err));
-    });
-});
+router.get('/:id', agentController.getAgentById);
 
-/* POST new Agent*/
-router.post('/', function(req, res){
-  db.Agent.create({
-    email: req.body.email,
-    password: req.body.password,
-    entreprise: req.body.entreprise,
-    googleUUID: req.body.googleUUID,
-    tel: req.body.tel
-  })
-  .then( agent => 
-    res.status(200).send(JSON.stringify(agent))
-  )
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
+router.post('/', agentController.createAgent);
 
-/* DELETE Agent*/
-router.get("/delete/:id", function(req, res){
-  db.Agent.destroy({
-    where: {
-      id: req.params.id
-    }
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-});
+router.get("/delete/:id", agentController.deleteAgent);
 
-router.get('/getTrajetsFromAgent/:id',async function(req,res){
-  try{
-    const agent = await db.Agent.findByPk(req.params.id);
-    const voyages = await data_manip.getTrajetsForPlace(agent);
-    res.status(200).json(voyages)
-  } catch (err) {
-    console.error('Error in GET /getTrajetsFromAgent/:id', err.message);
-    res.status(500).json({ error: err.message });
-  }
-})
+router.get('/getTrajetsFromAgent/:id',agentController.getTrajetsFromAgent)
 
-router.get('/getTrajetsFromUuid/:uuid',async function(req,res){
-  try{
-    const agent = await db.Agent.findOne({
-      where: { googleUUID: req.params.uuid }
-    })
-    const voyages = await data_manip.getTrajetsForPlace(agent);
-    res.status(200).json(voyages)
-  } catch (err) {
-    console.error('Error in GET /getTrajetsFromUuid/:uuid', err.message);
-    res.status(500).json({ error: err.message });
-  }
-  
-})
+router.get('/getTrajetsFromUuid/:uuid',agentController.getTrajetsFromUuid)
 
 
 module.exports = router;

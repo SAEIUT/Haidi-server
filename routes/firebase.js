@@ -1,7 +1,7 @@
 // /routes/userRoutes.js
 
 var express = require('express');
-const { checkEmailExists, signInUser, createUser,signInAgent,createAgent } = require('../controllers/firebase-user-controller');
+const { checkEmailExists, signInUser, createUser,signInAgent,createAgent,getUserByUid,getAgentByUid, updateUser } = require('../controllers/firebase-user-controller');
 
 const router = express.Router();
 
@@ -16,12 +16,17 @@ router.post('/agent/sign-in', signInAgent);
 
 router.post('/agent/sign-up', createAgent);
 
+router.get('/user/:uid', getUserByUid);
+router.get('/agent/:uid', getAgentByUid);
+
+router.put('/user/:uid', updateUser);
+
 module.exports = router;
 
 
 /**
  * @swagger
- * /api/user/check-email:
+ * /api/firebase/user/check-email:
  *   post:
  * 
  *     summary: Vérifier si un email existe
@@ -58,7 +63,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/user/sign-in:
+ * /api/firebase/user/sign-in:
  *   post:
  *     tags: [Firebase]
  *     summary: Se connecter avec un email et un mot de passe
@@ -95,7 +100,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/user/sign-up:
+ * /api/firebase/user/sign-up:
  *   post:
  *     tags: [Firebase]
  *     summary: Créer un nouvel utilisateur
@@ -163,7 +168,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/agent/sign-up:
+ * /api/firebase/agent/sign-up:
  *   post:
  *     tags: [Firebase]
  *     summary: Créer un nouvel agent
@@ -215,7 +220,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /api/agent/sign-in:
+ * /api/firebase/agent/sign-in:
  *   post:
  *     tags: [Firebase]
  *     summary: Se connecter avec un email et un mot de passe
@@ -246,6 +251,68 @@ module.exports = router;
  *                 user:
  *                   type: object
  *                   description: Détails de l'utilisateur connecté.
+ *       500:
+ *         description: Erreur du serveur.
+ */
+
+/**
+ * @swagger
+ * /api/firebase/user/{uid}:
+ *   get:
+ *     tags: [Firebase]
+ *     summary: Récupérer un utilisateur par son UID
+ *     description: Retourne les informations d'un utilisateur Firebase en fonction de son UID.
+ *     parameters:
+ *       - in: path
+ *         name: uid
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'UID de l'utilisateur.
+ *     responses:
+ *       200:
+ *         description: Informations de l'utilisateur récupérées avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   description: Détails de l'utilisateur.
+ *       404:
+ *         description: Utilisateur non trouvé.
+ *       500:
+ *         description: Erreur du serveur.
+ */
+
+/**
+ * @swagger
+ * /api/firebase/agent/{uid}:
+ *   get:
+ *     tags: [Firebase]
+ *     summary: Récupérer un agent par son UID
+ *     description: Retourne les informations d'un agent Firebase en fonction de son UID.
+ *     parameters:
+ *       - in: path
+ *         name: uid
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'UID de l'agent.
+ *     responses:
+ *       200:
+ *         description: Informations de l'agent récupérées avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 agent:
+ *                   type: object
+ *                   description: Détails de l'agent.
+ *       404:
+ *         description: Agent non trouvé.
  *       500:
  *         description: Erreur du serveur.
  */
