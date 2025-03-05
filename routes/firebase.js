@@ -19,6 +19,7 @@ router.post('/agent/sign-up', createAgent);
 router.get('/user/:uid', getUserByUid);
 router.get('/agent/:uid', getAgentByUid);
 
+
 module.exports = router;
 
 
@@ -311,6 +312,79 @@ module.exports = router;
  *                   description: Détails de l'agent.
  *       404:
  *         description: Agent non trouvé.
+ *       500:
+ *         description: Erreur du serveur.
+ */
+
+/**
+ * @swagger
+ * /api/firebase/user/{uid}:
+ *   put:
+ *     tags: [Firebase]
+ *     summary: Mettre à jour un utilisateur par son UID
+ *     description: Met à jour les informations d'un utilisateur existant dans Firebase.
+ *     parameters:
+ *       - in: path
+ *         name: uid
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: L'UID de l'utilisateur à mettre à jour.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Le nouvel email de l'utilisateur.
+ *                 example: 'updated@example.com'
+ *               firstname:
+ *                 type: string
+ *                 description: Le prénom mis à jour de l'utilisateur.
+ *                 example: 'John'
+ *               lastname:
+ *                 type: string
+ *                 description: Le nom mis à jour de l'utilisateur.
+ *                 example: 'Doe'
+ *               birthdate:
+ *                 type: string
+ *                 format: date
+ *                 description: La date de naissance mise à jour de l'utilisateur.
+ *                 example: '1995-05-15'
+ *               civility:
+ *                 type: string
+ *                 description: La civilité mise à jour de l'utilisateur.
+ *                 example: 'M.'
+ *               Tel:
+ *                 type: string
+ *                 description: Le numéro de téléphone mis à jour de l'utilisateur.
+ *                 example: '0612345678'
+ *               Note:
+ *                 type: string
+ *                 description: Notes supplémentaires mises à jour concernant l'utilisateur.
+ *                 example: 'Utilisateur VIP'
+ *               handicap:
+ *                 type: boolean
+ *                 description: Indique si l'utilisateur a un handicap.
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Utilisateur mis à jour avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 'Utilisateur mis à jour avec succès.'
+ *       400:
+ *         description: Erreur de validation, un ou plusieurs champs sont incorrects.
+ *       404:
+ *         description: Utilisateur non trouvé.
  *       500:
  *         description: Erreur du serveur.
  */
