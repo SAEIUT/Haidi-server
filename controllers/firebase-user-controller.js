@@ -66,9 +66,6 @@ exports.createUser = async (req, res) => {
   if (!Tel) {
     return res.status(400).json({ error: "Le champ 'Tel' est obligatoire." });
   }
-  if (!Note) {
-    return res.status(400).json({ error: "Le champ 'note' est obligatoire." });
-  }
   if (!handicap) {
     return res.status(400).json({ error: "Le champ 'handicap' est obligatoire." });
   }
