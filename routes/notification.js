@@ -27,6 +27,7 @@ router.post('/produce', async (req, res) => {
 global.clients = [];
 
 router.post('/consume', async (req, res) => {
+  console.log('Request body', req.body);
   console.log(`Request to consume messages for user ${req.body.userId}`);
   const { userId } = req.body;
   if (!userId) {
