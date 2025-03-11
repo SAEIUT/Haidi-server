@@ -41,11 +41,13 @@ router.post('/consume', async (req, res) => {
   const client = { userId: userId.toString(), res };
   global.clients.push(client);
   res.write('data: Consumer started\n\n');
+  console.log(`Consumer started for user ${userId}`);
 
   try {
     // Start the Kafka consumer and push events as messages are consumed
     await startConsumer((message) => {
         // Send the consumed message to the client in real-time using SSE
+        console.log(`Sending message to client for user ${userId}`, message);
         res.write(`data: ${JSON.stringify(message)}\n\n`);
     }, req.body.userId);
 } catch (err) {
