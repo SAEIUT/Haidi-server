@@ -3,8 +3,17 @@ const { Sequelize, DataTypes, Op } = require('sequelize');
 const app = express();
 const port = 3000;
 
+const cors = require('cors');
 // Middleware pour parser les requêtes JSON
 app.use(express.json());
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'] ,
+}));
+
+app.options('*', cors());
 
 // Configuration Sequelize pour MySQL
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
@@ -201,6 +210,16 @@ app.post('/agent', (req, res) => {
     });
 });
 
+
+app.get('/agent/All', async (req, res) => {
+    try {
+        const agents = await Agent.findAll();
+        res.json(agents);
+    } catch (err) {
+        console.error('Error in GET /agent/getAll', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Lancer le serveur
 app.listen(port, () => {

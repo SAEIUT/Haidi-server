@@ -10,7 +10,7 @@ router.get('/:id', reservationController.getReservationById);
 
 router.post('/',reservationController.createReservation);
 
-router.post('/deleteReservation/:id',reservationController.deleteReservation);
+router.get('/deleteReservation/:id',reservationController.deleteReservation);
 
 router.get('/byuserid/:id',reservationController.getReservationsByUserId);
 

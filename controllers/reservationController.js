@@ -28,7 +28,13 @@ exports.getReservationById = async (req, res) => {
 exports.deleteReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedReservation = await no_sql_db.DataModel.findOneAndDelete({ idDossier: id });
+    const idDossier = Number(id);
+
+    if (isNaN(idDossier)) {
+      return res.status(400).json({ error: "ID invalide." });
+    }
+
+    const deletedReservation = await no_sql_db.DataModel.findOneAndDelete({ idDossier });
 
     if (!deletedReservation) {
       return res.status(404).json({ error: "Réservation non trouvée." });
@@ -39,6 +45,7 @@ exports.deleteReservation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.createReservation = async (req, res) => {
   try {

@@ -29,7 +29,7 @@ Le deployment est automatisé tout les matins à 6h sur un serveur Azure.
 
 ### Affiche Architecture
 
-![Logo du projet](docs/images/Affiche_Archi.png)
+![Affiche Architecture](docs/images/Affiche_Archi.png)
 
 ## Installation & Déploiement
 

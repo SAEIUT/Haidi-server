@@ -1,6 +1,6 @@
 // userController.js
 const db = require('../sql-database');
-const dbMongo = require('../nosql-database');
+const no_sql_db = require('../nosql-database');
 
 // Récupérer tous les utilisateurs
 exports.getAllUsers = (req, res) => {
@@ -97,7 +97,7 @@ exports.deleteUser = (req, res) => {
       const { id } = req.params; // Récupération de l'ID ou Google ID depuis l'URL
   
       // Recherche dans les réservations où l'utilisateur est accompagnant
-      const reservations = await dbMongo.Reservation.find({
+      const reservations = await no_sql_db.Reservation.find({
         $or: [{ id_accompagnant: id }, { googleId_accompagnant: id }]
       });
   
