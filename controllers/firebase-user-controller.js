@@ -152,7 +152,7 @@ exports.getUserByUid = async (req, res) => {
 
   try {
     // Récupérer l'utilisateur depuis Firestore en fonction du type PMR
-    const user = await getUserFromFirestore(uid, "PMR");
+    const user = await getUserFromFirestore(uid, "PMR","uid");
 
     // Si l'utilisateur est trouvé
     return res.status(200).json({ user });
@@ -171,9 +171,50 @@ exports.getAgentByUid = async (req, res) => {
 
   try {
     // Récupérer l'agent depuis Firestore en fonction du type AGENT
-    const agent = await getUserFromFirestore(uid, "AGENT");
+    const agent = await getUserFromFirestore(uid, "AGENT","uid");
 
     // Si l'agent est trouvé
+    return res.status(200).json({ agent });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+exports.getUserByEmail = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Le champ 'email' est obligatoire." });
+  }
+
+  try {
+    const user = await getUserFromFirestore(email, "PMR", "email");
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé." });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAgentByEmail = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Le champ 'email' est obligatoire." });
+  }
+
+  try {
+    const agent = await getUserFromFirestore(email, "AGENT", "email");
+
+    if (!agent) {
+      return res.status(404).json({ error: "Agent non trouvé." });
+    }
+
     return res.status(200).json({ agent });
   } catch (error) {
     console.error(error);

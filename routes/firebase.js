@@ -1,7 +1,8 @@
 // /routes/userRoutes.js
 
 var express = require('express');
-const { checkEmailExists, signInUser, createUser,signInAgent,createAgent,getUserByUid,getAgentByUid, updateUser } = require('../controllers/firebase-user-controller');
+const { checkEmailExists, signInUser, createUser,signInAgent,createAgent,getUserByUid,getAgentByUid, updateUser,getUserByEmail,getAgentByEmail } = require('../controllers/firebase-user-controller');
+const { get } = require('http');
 
 const router = express.Router();
 
@@ -18,6 +19,9 @@ router.post('/agent/sign-up', createAgent);
 
 router.get('/user/:uid', getUserByUid);
 router.get('/agent/:uid', getAgentByUid);
+
+router.post('/user/getByMail', getUserByEmail);
+router.post('/agent/getByMail', getAgentByEmail);
 
 router.put('/user/:uid', updateUser);
 
@@ -388,4 +392,64 @@ module.exports = router;
  *         description: Utilisateur non trouvé.
  *       500:
  *         description: Erreur du serveur.
+ */
+
+/**
+ * @swagger
+ * /api/firebase/user/getByMail:
+ *   post:
+ *     tags: [Firebase]
+ *     summary: Récupère un utilisateur PMR par email
+ *     description: Permet de récupérer un utilisateur de type PMR en utilisant son adresse email.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: L'email de l'utilisateur PMR à récupérer
+ *     responses:
+ *       200:
+ *         description: Données de l'utilisateur récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Utilisateur non trouvé
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * /api/firebase/agent/getByMail:
+ *   post:
+ *     tags: [Firebase]
+ *     summary: Récupère un agent par email
+ *     description: Permet de récupérer un utilisateur de type agent en utilisant son adresse email.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: L'email de l'agent à récupérer
+ *     responses:
+ *       200:
+ *         description: Données de l'agent récupérées avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: Agent non trouvé
+ *       500:
+ *         description: Erreur serveur
  */
