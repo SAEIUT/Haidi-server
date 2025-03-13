@@ -28,36 +28,46 @@ global.clients = [];
 
 router.post('/consume', async (req, res) => {
   console.log('Request body', req.body);
-  console.log(`Request to consume messages for user ${req.body.userId}`);
   const { userId } = req.body;
+
   if (!userId) {
       return res.status(400).send('User ID is required');
   }
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
+  console.log(`Request to consume messages for user ${userId}`);
 
-  // Store client connection
-  const client = { userId: userId.toString(), res };
+  // Check if the consumer already exists for this user
+  let client = global.clients.find(c => c.userId === userId.toString());
+
+  if (client) {
+    // If the user is already being consumed, send the accumulated messages
+    console.log(`User ${userId} already has an active consumer.`);
+    res.status(200).json(client.messagesBuffer);
+    client.messagesBuffer = []; // Clear buffer after sending
+    return;
+  }
+
+  // Otherwise, create a new consumer for this user
+  client = { userId: userId.toString(), messagesBuffer: [] };
   global.clients.push(client);
-  res.write('data: Consumer started\n\n');
   console.log(`Consumer started for user ${userId}`);
 
   try {
-    // Start the Kafka consumer and push events as messages are consumed
+    // Start the Kafka consumer and push events to the client's message buffer
     await startConsumer((message) => {
-        // Send the consumed message to the client in real-time using SSE
-        console.log(`Sending message to client for user ${userId}`, message);
-        res.write(`data: ${JSON.stringify(message)}\n\n`);
-    }, req.body.userId);
-} catch (err) {
-    console.error('Error starting the consumer', err);
-    res.status(500).send('Failed to start the consumer');
-}
+      console.log(`Received message for user ${userId}`, message);
+      client.messagesBuffer.push(message);  // Store messages in the client's buffer
+    }, userId);
 
+    // Immediately send back an empty list, consumer will keep running
+    res.status(200).json([]);
+  } catch (err) {
+    console.error('Error starting the consumer', err);
+    global.clients = global.clients.filter(c => c.userId !== userId.toString()); // Remove client on failure
+    res.status(500).send('Failed to start the consumer');
+  }
 });
+
 
 // Start consumer only once at application startup
 startConsumer((message) => {
