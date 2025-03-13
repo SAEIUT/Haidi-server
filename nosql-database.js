@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb://root:root@mongo:27017/",{
+mongoose.connect("mongodb://root:root@mongo:27017/?authSource=admin",{
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
